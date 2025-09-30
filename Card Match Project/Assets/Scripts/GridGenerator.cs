@@ -4,10 +4,14 @@ using UnityEngine;
 
 public class GridGenerator : MonoBehaviour
 {
+    [Header("Grid")]
     [SerializeField] Transform gridSizesTransform;
     [SerializeField] Transform gridTransform;
     [SerializeField] Transform rowPrefab;
-    [SerializeField] Transform cardPrefab;
+    [Header("Card")]
+    [SerializeField] Card cardPrefab;
+
+    List<Card> spawnedCards;
 
     int gridRows;
     int gridColumns;
@@ -25,7 +29,7 @@ public class GridGenerator : MonoBehaviour
                 gridColumns = 4;
                 break;
             case 2:
-                gridRows = 5;
+                gridRows = 4;
                 gridColumns = 5;
                 break;
             default:
@@ -41,12 +45,14 @@ public class GridGenerator : MonoBehaviour
 
     void InitGrid()
     {
-        for(int i = 0; i < gridRows; i++)
+        spawnedCards = new List<Card>();
+        for (int i = 0; i < gridRows; i++)
         {
             var row = Instantiate(rowPrefab, gridTransform);
             for(int j = 0; j < gridColumns; j++)
             {
                 var card = Instantiate(cardPrefab, row);
+                spawnedCards.Add(card);
             }
         }
     }

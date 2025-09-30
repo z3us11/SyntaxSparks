@@ -2,18 +2,31 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
+using UnityEngine.EventSystems;
+using UnityEngine.Events;
+using System;
 
-public class Card : MonoBehaviour
+public class Card : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField] Image cardFrontImg;
-    
-    public void FlipCard()
+    RectTransform rect;
+    int cardNumber;
+
+    public static Card selectedCard;
+
+    private void Awake()
     {
-        transform.Do
+        rect = GetComponent<RectTransform>();
     }
 
-    public void SetCardFront(Sprite sprite)
+    public void OnPointerClick(PointerEventData eventData)
     {
-        cardFrontImg.sprite = sprite;
+        FlipCard();
+    }
+
+    void FlipCard()
+    {
+        rect.DOScaleX(rect.localScale.x * -1, 0.25f);
     }
 }
