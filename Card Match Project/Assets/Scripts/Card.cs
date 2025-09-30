@@ -10,6 +10,7 @@ using System;
 public class Card : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField] Image cardFrontImg;
+
     RectTransform rect;
     int cardNumber;
 
@@ -22,6 +23,9 @@ public class Card : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        if(!GameManager.instance.gameStarted)
+            return;
+
         if (selectedCard == null)
         {
             selectedCard = this;
@@ -37,12 +41,16 @@ public class Card : MonoBehaviour, IPointerClickHandler
             }
             else
             {
+                UIManager.instance.UpdateMoves(1);
+
                 if (selectedCard.cardNumber == cardNumber)
                 {
                     // Match
                     Debug.Log("Match Found");
                     FlipCard();
                     StartCoroutine(MatchFound());
+                    UIManager.instance.UpdateCombo(1);
+                    UIManager.instance.UpdateMatches(1);
                 }
                 else
                 {
@@ -50,12 +58,13 @@ public class Card : MonoBehaviour, IPointerClickHandler
                     Debug.Log("No Match");
                     FlipCard();
                     StartCoroutine(NoMatchFound());
+                    UIManager.instance.UpdateCombo(-1);
                 }
             }
         }
     }
 
-    void FlipCard()
+    public void FlipCard()
     {
         rect.DOScaleX(rect.localScale.x * -1, 0.25f);
     }
@@ -68,8 +77,8 @@ public class Card : MonoBehaviour, IPointerClickHandler
     IEnumerator MatchFound()
     {
         yield return new WaitForSeconds(0.5f);
-        Destroy(selectedCard.gameObject);
-        Destroy(gameObject);
+        selectedCard.transform.DOScale(0, 0.25f).OnComplete(()=>selectedCard.gameObject.SetActive(false));
+        transform.DOScale(0, 0.25f).OnComplete(() => gameObject.SetActive(false));
         selectedCard = null;
     }
 

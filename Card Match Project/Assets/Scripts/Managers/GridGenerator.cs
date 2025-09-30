@@ -7,6 +7,7 @@ public class GridGenerator : MonoBehaviour
 {
     [Header("Grid")]
     [SerializeField] Transform gridSizesTransform;
+    [SerializeField] Transform gameViewTransform;
     [SerializeField] Transform gridTransform;
     [SerializeField] Transform rowPrefab;
     [Header("Card")]
@@ -43,11 +44,13 @@ public class GridGenerator : MonoBehaviour
 
         InitGrid();
         gridSizesTransform.gameObject.SetActive(false);
-        gridTransform.gameObject.SetActive(true);
+        gameViewTransform.gameObject.SetActive(true);
     }
 
     void InitGrid()
     {
+        GameManager.instance.StartGame();
+
         spawnedRows = new List<Transform>();
         spawnedCards = new List<Card>();
 
@@ -62,16 +65,19 @@ public class GridGenerator : MonoBehaviour
             }
         }
 
+        List<Card> currentCards = new List<Card>(spawnedCards);
         // Assign random cards to the spawned cards
-        while (spawnedCards.Count > 0)
+        while (currentCards.Count > 0)
         {
             int randomIndex = Random.Range(0, cardsData.Length);
-            spawnedCards[0].SetCard(cardsData[randomIndex].cardNumber, cardsData[randomIndex].cardFrontImage);
-            int randomCardIndex = Random.Range(1, spawnedCards.Count);
-            spawnedCards[randomCardIndex].SetCard(cardsData[randomIndex].cardNumber, cardsData[randomIndex].cardFrontImage);
+            currentCards[0].SetCard(cardsData[randomIndex].cardNumber, cardsData[randomIndex].cardFrontImage);
+            int randomCardIndex = Random.Range(1, currentCards.Count);
+            currentCards[randomCardIndex].SetCard(cardsData[randomIndex].cardNumber, cardsData[randomIndex].cardFrontImage);
 
-            spawnedCards.RemoveAt(randomCardIndex);
-            spawnedCards.RemoveAt(0);
+            currentCards.RemoveAt(randomCardIndex);
+            currentCards.RemoveAt(0);
+
+            GameManager.instance.totalMatches++;
         }
 
         StartCoroutine(DisableAutoLayoutGroups());
@@ -86,5 +92,23 @@ public class GridGenerator : MonoBehaviour
         {
             row.GetComponent<LayoutGroup>().enabled = false;
         }
+
+        StartCoroutine(RevealCardsAtStart());
+    }
+
+    IEnumerator RevealCardsAtStart()
+    {
+        Debug.Log("Revealing Cards");
+        yield return new WaitForSeconds(0.5f);
+        foreach (var card in spawnedCards)
+        {
+            card.FlipCard();
+        }
+        yield return new WaitForSeconds(1f);
+        foreach (var card in spawnedCards)
+        {
+            card.FlipCard();
+        }
+        GameManager.instance.CanPlay();
     }
 }
