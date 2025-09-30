@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GridGenerator : MonoBehaviour
 {
@@ -10,7 +11,9 @@ public class GridGenerator : MonoBehaviour
     [SerializeField] Transform rowPrefab;
     [Header("Card")]
     [SerializeField] Card cardPrefab;
+    [SerializeField] CardData[] cardsData;
 
+    List<Transform> spawnedRows;
     List<Card> spawnedCards;
 
     int gridRows;
@@ -45,15 +48,43 @@ public class GridGenerator : MonoBehaviour
 
     void InitGrid()
     {
+        spawnedRows = new List<Transform>();
         spawnedCards = new List<Card>();
+
         for (int i = 0; i < gridRows; i++)
         {
             var row = Instantiate(rowPrefab, gridTransform);
-            for(int j = 0; j < gridColumns; j++)
+            spawnedRows.Add(row);
+            for (int j = 0; j < gridColumns; j++)
             {
                 var card = Instantiate(cardPrefab, row);
                 spawnedCards.Add(card);
             }
+        }
+
+        // Assign random cards to the spawned cards
+        while (spawnedCards.Count > 0)
+        {
+            int randomIndex = Random.Range(0, cardsData.Length);
+            spawnedCards[0].SetCard(cardsData[randomIndex].cardNumber, cardsData[randomIndex].cardFrontImage);
+            int randomCardIndex = Random.Range(1, spawnedCards.Count);
+            spawnedCards[randomCardIndex].SetCard(cardsData[randomIndex].cardNumber, cardsData[randomIndex].cardFrontImage);
+
+            spawnedCards.RemoveAt(randomCardIndex);
+            spawnedCards.RemoveAt(0);
+        }
+
+        StartCoroutine(DisableAutoLayoutGroups());
+    }
+
+    IEnumerator DisableAutoLayoutGroups()
+    {
+        yield return new WaitForEndOfFrame();
+
+        gridTransform.GetComponent<LayoutGroup>().enabled = false;
+        foreach (var row in spawnedRows)
+        {
+            row.GetComponent<LayoutGroup>().enabled = false;
         }
     }
 }

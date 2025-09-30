@@ -22,11 +22,62 @@ public class Card : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        FlipCard();
+        if (selectedCard == null)
+        {
+            selectedCard = this;
+            FlipCard();
+        }
+        else
+        {
+            if (selectedCard == this)
+            {
+                Debug.Log("Same Card Clicked");
+                selectedCard = null;
+                FlipCard();
+            }
+            else
+            {
+                if (selectedCard.cardNumber == cardNumber)
+                {
+                    // Match
+                    Debug.Log("Match Found");
+                    FlipCard();
+                    StartCoroutine(MatchFound());
+                }
+                else
+                {
+                    // No Match
+                    Debug.Log("No Match");
+                    FlipCard();
+                    StartCoroutine(NoMatchFound());
+                }
+            }
+        }
     }
 
     void FlipCard()
     {
         rect.DOScaleX(rect.localScale.x * -1, 0.25f);
+    }
+
+    public void SetCard(int number, Sprite sprite)
+    {
+        cardNumber = number;
+        cardFrontImg.sprite = sprite;
+    }
+    IEnumerator MatchFound()
+    {
+        yield return new WaitForSeconds(0.5f);
+        Destroy(selectedCard.gameObject);
+        Destroy(gameObject);
+        selectedCard = null;
+    }
+
+    IEnumerator NoMatchFound()
+    {
+        yield return new WaitForSeconds(0.5f);
+        selectedCard.FlipCard();
+        FlipCard();
+        selectedCard = null;
     }
 }
