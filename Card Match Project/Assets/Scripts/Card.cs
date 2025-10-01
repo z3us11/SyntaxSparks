@@ -75,8 +75,11 @@ public class Card : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    public void FlipCard()
+    public void FlipCard(bool playSound = true)
     {
+        if(playSound)
+            SoundManager.instance.PlayFlipSound();
+
         float newScaleX = Mathf.Approximately(rect.localScale.x, 1f) ? -1f : 1f;
         rect.DOScaleX(newScaleX, 0.25f);
     }
@@ -103,6 +106,8 @@ public class Card : MonoBehaviour, IPointerClickHandler
         yield return new WaitForSeconds(0.25f); // short delay only for animation
         first.isMatched = second.isMatched = true;
 
+        SoundManager.instance.PlayCorrectSound();
+
         first.transform.DOScale(0, 0.25f).OnComplete(() => first.gameObject.SetActive(false));
         second.transform.DOScale(0, 0.25f).OnComplete(() => second.gameObject.SetActive(false));
     }
@@ -113,6 +118,9 @@ public class Card : MonoBehaviour, IPointerClickHandler
         yield return new WaitForSeconds(0.5f); // allow player to see mismatch
         first.isFlipped = false;
         second.isFlipped = false;
+
+        SoundManager.instance.PlayWrongSound();
+
         first.FlipCard();
         second.FlipCard();
     }

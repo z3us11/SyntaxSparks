@@ -88,6 +88,9 @@ public class UIManager : MonoBehaviour
         yield return new WaitForSeconds(1f);
         GameManager.instance.EndGame();
         gameOverView.gameObject.SetActive(true);
+
+        SoundManager.instance.PlayWinSound();
+
         gameOverMovesTxt.text = "Moves\n" + GameManager.instance.moves.ToString();
         gameOverMatchesTxt.text = "Matches\n" + GameManager.instance.matches.ToString();
         gameOverComboTxt.text = "Max Combo\n" + GameManager.instance.combo.ToString();

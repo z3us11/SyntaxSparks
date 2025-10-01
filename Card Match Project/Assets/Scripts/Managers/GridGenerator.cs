@@ -231,13 +231,18 @@ public class GridGenerator : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
         foreach (var card in spawnedCards)
         {
-            card.FlipCard();
+            card.FlipCard(false);
         }
+        SoundManager.instance.PlayFlipSound();
+
         yield return new WaitForSeconds(1f);
+
         foreach (var card in spawnedCards)
         {
-            card.FlipCard();
+            card.FlipCard(false);
         }
+        SoundManager.instance.PlayFlipSound();
+
         GameManager.instance.CanPlay();
     }
 }
