@@ -1,20 +1,18 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using UnityEngine.EventSystems;
-using UnityEngine.Events;
-using System;
 
 public class Card : MonoBehaviour, IPointerClickHandler
 {
-    [SerializeField] Image cardFrontImg;
-
-    RectTransform rect;
-    int cardNumber;
+    [SerializeField] private Image cardFrontImg;
+    private RectTransform rect;
+    private int cardNumber;
 
     public static Card selectedCard;
+    private bool isFlipped = false;
+    private bool isMatched = false;
 
     private void Awake()
     {
@@ -23,21 +21,27 @@ public class Card : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if(!GameManager.instance.gameStarted)
+        if (!GameManager.instance.gameStarted || isFlipped || isMatched)
             return;
+
+        // flip immediately (logic)
+        isFlipped = true;
+        FlipCard();
 
         if (selectedCard == null)
         {
+            // first selection
             selectedCard = this;
-            FlipCard();
         }
         else
         {
             if (selectedCard == this)
             {
                 Debug.Log("Same Card Clicked");
-                selectedCard = null;
+                // flip back immediately
+                isFlipped = false;
                 FlipCard();
+                selectedCard = null;
             }
             else
             {
@@ -45,19 +49,15 @@ public class Card : MonoBehaviour, IPointerClickHandler
 
                 if (selectedCard.cardNumber == cardNumber)
                 {
-                    // Match
                     Debug.Log("Match Found");
-                    FlipCard();
-                    StartCoroutine(MatchFound());
+                    StartCoroutine(MatchFound(selectedCard, this));
                     UIManager.instance.UpdateCombo(1);
                     UIManager.instance.UpdateMatches(1);
                 }
                 else
                 {
-                    // No Match
                     Debug.Log("No Match");
-                    FlipCard();
-                    StartCoroutine(NoMatchFound());
+                    StartCoroutine(NoMatchFound(selectedCard, this));
                     UIManager.instance.UpdateCombo(-1);
                 }
             }
@@ -66,27 +66,36 @@ public class Card : MonoBehaviour, IPointerClickHandler
 
     public void FlipCard()
     {
-        rect.DOScaleX(rect.localScale.x * -1, 0.25f);
+        float newScaleX = Mathf.Approximately(rect.localScale.x, 1f) ? -1f : 1f;
+        rect.DOScaleX(newScaleX, 0.25f);
     }
 
     public void SetCard(int number, Sprite sprite)
     {
         cardNumber = number;
         cardFrontImg.sprite = sprite;
-    }
-    IEnumerator MatchFound()
-    {
-        yield return new WaitForSeconds(0.5f);
-        selectedCard.transform.DOScale(0, 0.25f).OnComplete(()=>selectedCard.gameObject.SetActive(false));
-        transform.DOScale(0, 0.25f).OnComplete(() => gameObject.SetActive(false));
-        selectedCard = null;
+        isFlipped = false;
+        isMatched = false;
+        gameObject.SetActive(true);
     }
 
-    IEnumerator NoMatchFound()
+    private IEnumerator MatchFound(Card first, Card second)
     {
-        yield return new WaitForSeconds(0.5f);
-        selectedCard.FlipCard();
-        FlipCard();
         selectedCard = null;
+        yield return new WaitForSeconds(0.25f); // short delay only for animation
+        first.isMatched = second.isMatched = true;
+
+        first.transform.DOScale(0, 0.25f).OnComplete(() => first.gameObject.SetActive(false));
+        second.transform.DOScale(0, 0.25f).OnComplete(() => second.gameObject.SetActive(false));
+    }
+
+    private IEnumerator NoMatchFound(Card first, Card second)
+    {
+        selectedCard = null;
+        yield return new WaitForSeconds(0.5f); // allow player to see mismatch
+        first.isFlipped = false;
+        second.isFlipped = false;
+        first.FlipCard();
+        second.FlipCard();
     }
 }
