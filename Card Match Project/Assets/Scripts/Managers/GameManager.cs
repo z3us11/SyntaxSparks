@@ -6,6 +6,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
 
+    public GridGenerator gridGenerator;
     public bool gameStarted = false;
 
     public int moves;

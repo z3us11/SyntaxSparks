@@ -3,16 +3,27 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using UnityEngine.EventSystems;
+using System;
+
+[Serializable]
+public class CardSaveData
+{
+    public int cardNumber;
+    public string cardImageName;
+    public bool isMatched;
+}
 
 public class Card : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField] private Image cardFrontImg;
     private RectTransform rect;
-    private int cardNumber;
+
+    public int cardNumber;
+    public CardSaveData saveData;
 
     public static Card selectedCard;
     private bool isFlipped = false;
-    private bool isMatched = false;
+    public bool isMatched = false;
 
     private void Awake()
     {
@@ -77,6 +88,13 @@ public class Card : MonoBehaviour, IPointerClickHandler
         isFlipped = false;
         isMatched = false;
         gameObject.SetActive(true);
+    }
+
+    public void SetSaveData()
+    {
+        saveData.isMatched = isMatched;
+        saveData.cardNumber = cardNumber;
+        saveData.cardImageName = cardFrontImg.sprite.name;
     }
 
     private IEnumerator MatchFound(Card first, Card second)

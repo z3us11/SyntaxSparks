@@ -41,20 +41,22 @@ public class UIManager : MonoBehaviour
         homeBtn.onClick.AddListener(() =>
         {
             GameManager.instance.EndGame();
+            GameManager.instance.gridGenerator.SaveData();
             UnityEngine.SceneManagement.SceneManager.LoadScene(0);
         });
         gameOverHomeBtn.onClick.AddListener(() =>
         {
             GameManager.instance.EndGame();
+            GameManager.instance.gridGenerator.ClearSave();
             UnityEngine.SceneManagement.SceneManager.LoadScene(0);
         });
     }
 
     public void Init()
     {
-        movesTxt.text = "Moves\n0";
-        matchesTxt.text = "Matches\n0";
-        comboTxt.text = "Combo\n0";
+        movesTxt.text = "Moves\n" + GameManager.instance.moves.ToString();
+        matchesTxt.text = "Matches\n" + GameManager.instance.matches.ToString();
+        comboTxt.text = "Max Combo\n" + GameManager.instance.combo.ToString();
     }
 
     public void UpdateMoves(int value)
@@ -90,7 +92,7 @@ public class UIManager : MonoBehaviour
         gameOverMatchesTxt.text = "Matches\n" + GameManager.instance.matches.ToString();
         gameOverComboTxt.text = "Max Combo\n" + GameManager.instance.combo.ToString();
     }
-    
 
-    
+
+
 }
